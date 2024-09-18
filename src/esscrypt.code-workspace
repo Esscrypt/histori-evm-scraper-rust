@@ -1,0 +1,26 @@
+{
+	"folders": [
+		{
+			"path": "../../esscrypt"
+		},
+		{
+			"path": "../../histori-backend"
+		},
+		{
+			"path": "../../histori-scraper"
+		},
+		{
+			"path": "../../histori-rest-api"
+		},
+		{
+			"path": "../../../Downloads/stripe-sample-code"
+		},
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../tidy-histori-site"
+		}
+	],
+	"settings": {}
+}
