@@ -1,9 +1,6 @@
 {
 	"folders": [
 		{
-			"path": "../../esscrypt"
-		},
-		{
 			"path": "../../histori-backend"
 		},
 		{
@@ -13,13 +10,25 @@
 			"path": "../../histori-rest-api"
 		},
 		{
-			"path": "../../../Downloads/stripe-sample-code"
-		},
-		{
 			"path": ".."
 		},
 		{
 			"path": "../../tidy-histori-site"
+		},
+		{
+			"path": "../../histori-docs"
+		},
+		{
+			"path": "../../portfolio"
+		},
+		{
+			"path": "../../histori-load-tests"
+		},
+		{
+			"path": "../../black-peak-assignment-backend"
+		},
+		{
+			"path": "../../infomatika-access-control"
 		}
 	],
 	"settings": {}

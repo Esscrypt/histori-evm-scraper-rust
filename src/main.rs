@@ -94,14 +94,15 @@ async fn main() {
 
     let mut from_block: u64 = read_last_processed_block("lastProcessedBlock.txt");
 
-    let mut current_block: u64 = 0;
+
+   let mut latest_finalized_block = provider.get_block_number().await.unwrap().0[0];
+
+   info!("Starting the block processing loop");
 
     // Continuously process blocks
-    while from_block < current_block {
+    while from_block < latest_finalized_block {
         // Calculate the block range for the current iteration
-        current_block = provider.get_block_number().await.unwrap().0[0];
-
-        let to_block = if from_block > current_block - block_range { current_block } else { from_block + block_range};  // Ensure from_block doesn't exceed current_block
+        let to_block = if from_block > latest_finalized_block - block_range { latest_finalized_block } else { from_block + block_range};  // Ensure from_block doesn't exceed current_block
         
         info!("Processing blocks from {} to {}", from_block, to_block);
 
@@ -133,6 +134,7 @@ async fn main() {
 
         // Move to the next block range
         from_block = to_block + block_range;
+        latest_finalized_block = provider.get_block_number().await.unwrap().0[0];
     }
 }
 
