@@ -168,7 +168,7 @@ async fn fetch_logs(provider: &Provider<Http>, from_block: u64, to_block: u64, c
     let filter = Filter::new()
         .from_block(BlockNumber::Number(from_block.into()))
         .to_block(BlockNumber::Number(to_block.into()))
-        .events(topics_vec);
+        .topic0(topics_vec);
 
     let logs = match provider.get_logs(&filter).await {
         Ok(logs) => {
