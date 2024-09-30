@@ -1529,6 +1529,7 @@ dependencies = [
  "hex-literal",
  "log",
  "once_cell",
+ "primitive-types",
  "r2d2",
  "serde",
  "serde_json",

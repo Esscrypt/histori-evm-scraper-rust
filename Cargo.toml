@@ -21,3 +21,5 @@ futures = "0.3.30"
 
 log = "0.4"
 env_logger = "0.11.5"  # Alternatively, use flexi_logger for more advanced logging features
+
+primitive-types = "0.12"
