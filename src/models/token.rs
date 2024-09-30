@@ -14,7 +14,7 @@ pub struct Token {
     pub decimals: Option<i16>,             // Decimals (optional for ERC20)
 
     // ERC777-specific metadata
-    pub granularity: Option<i64>,             // Granularity (optional for ERC777)
+    pub granularity: Option<String>,             // Granularity (optional for ERC777)
 
 }
 
@@ -30,6 +30,6 @@ pub struct NewToken<'a> {
     pub name: Option<String>,                     // Name is required
     pub symbol: Option<String>,                   // Symbol is required
     pub decimals: Option<i16>,             // Decimals (optional for ERC20)
-    pub granularity: Option<i64>,             // Decimals (optional for ERC20)
+    pub granularity: Option<String>,             // Decimals (optional for ERC20)
     
 }

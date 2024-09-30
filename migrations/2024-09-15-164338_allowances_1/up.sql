@@ -6,11 +6,11 @@ CREATE TABLE tokens (
     block_number INTEGER NOT NULL,             -- Integer for block number
     token_type VARCHAR NOT NULL,       -- Enum to represent the type of token
 
-    -- ERC20-specific metadata (name and symbol required)
+    -- metadata
     name VARCHAR(255),                -- Token name (required)
     symbol VARCHAR(50),               -- Token symbol (required)
     decimals SMALLINT,                         -- Token decimals (optional for ERC20)
-    granularity BIGINT 
+    granularity VARCHAR(255)                 -- Token granularity (optional for ERC777) 
 );
 
 -- Create the token_ids table to store ERC721/1155 token-specific metadata

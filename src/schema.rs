@@ -50,7 +50,8 @@ diesel::table! {
         #[max_length = 50]
         symbol -> Nullable<Varchar>,
         decimals -> Nullable<Int2>,
-        granularity -> Nullable<Int8>,
+        #[max_length = 255]
+        granularity -> Nullable<Varchar>,
     }
 }
 

@@ -34,7 +34,7 @@ pub async fn check_and_insert_token(
             let contract = create_erc20_contract(token_address_value, provider.clone())?;
             let erc_name = contract.name().call().await.ok();
             let erc_symbol = contract.symbol().call().await.ok();
-            let erc_decimals = contract.decimals().call().await.ok().and_then(|d| d.try_into().ok());
+            let erc_decimals: Option<i16> = contract.decimals().call().await.ok().and_then(|d| d.try_into().ok());
             (erc_name, erc_symbol, erc_decimals, None)
         }
         TokenType::ERC721 => {
@@ -47,7 +47,7 @@ pub async fn check_and_insert_token(
             let contract = create_erc777_contract(token_address_value, provider.clone())?;
             let erc_name = contract.name().call().await.ok();
             let erc_symbol = contract.symbol().call().await.ok();
-            let erc_granularity = contract.granularity().call().await.ok().and_then(|g| g.try_into().ok());
+            let erc_granularity = contract.granularity().call().await.ok().map(|g| g.to_string()); // Store as string
             (erc_name, erc_symbol, None, erc_granularity) // ERC777 has granularity
         }
         TokenType::ERC1155 => {
@@ -68,8 +68,8 @@ pub async fn check_and_insert_token(
             TokenType::ERC777 => "ERC777",
             TokenType::ERC1155 => "ERC1155",
         },
-        name: erc_name.clone(),
-        symbol: erc_symbol.clone(),
+        name: erc_name,
+        symbol: erc_symbol,
         decimals: erc_decimals,
         granularity: erc_granularity,
     };
@@ -83,10 +83,10 @@ pub async fn check_and_insert_token(
         token_address: token_address_value.to_vec(),
         block_number: current_block_number,
         token_type: new_token.token_type.to_string(),
-        name: erc_name,
-        symbol: erc_symbol,
-        decimals: erc_decimals,
-        granularity: erc_granularity,
+        name: new_token.name,
+        symbol: new_token.symbol,
+        decimals: new_token.decimals,
+        granularity: new_token.granularity,
     })
 }
 // The rest of the code remains the same
