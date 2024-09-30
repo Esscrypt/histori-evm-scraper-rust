@@ -1,23 +1,23 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
-    allowances (owner_address, token_address, block_number) {
+    allowances (owner_address, token_address, block_number, token_id) {
         owner_address -> Bytea,
         spender_address -> Bytea,
         token_address -> Bytea,
         allowance -> Nullable<Text>,
         block_number -> Int4,
-        token_id -> Nullable<Int2>,
+        token_id -> Int2,
         token_type -> Text,
     }
 }
 
 diesel::table! {
-    balances (wallet_address, token_address, block_number) {
+    balances (wallet_address, token_address, block_number, token_id) {
         wallet_address -> Bytea,
         token_address -> Bytea,
         balance -> Text,
-        token_id -> Nullable<Int2>,
+        token_id -> Int2,
         token_type -> Text,
         block_number -> Int4,
     }

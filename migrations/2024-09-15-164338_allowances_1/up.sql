@@ -33,7 +33,7 @@ CREATE TABLE allowances (
     block_number INTEGER NOT NULL,      -- Indexed for querying by block number
     token_id SMALLINT,                   -- Optional, for ERC721 tokens
     token_type TEXT NOT NULL,       -- Store "ERC20", "ERC721", etc.
-    PRIMARY KEY (owner_address, token_address, block_number)  -- Unique per wallet, token, and block
+    PRIMARY KEY (owner_address, token_address, block_number, token_id)  -- Unique per wallet, token, and block
 );
 
 -- Indexes for faster querying
@@ -60,7 +60,7 @@ CREATE TABLE balances (
     token_id SMALLINT,                                              -- Optional, for ERC721 tokens
     token_type TEXT NOT NULL,                                    -- Store "ERC20", "ERC721", etc.
     block_number INTEGER NOT NULL,                                  -- Block number at the time of balance update
-    PRIMARY KEY (wallet_address, token_address, block_number)       -- Unique per wallet, token, and block
+    PRIMARY KEY (wallet_address, token_address, block_number, token_id)     -- Unique per wallet, token, and block
 );
 
 -- Indexes for faster querying
