@@ -32,27 +32,29 @@ pub async fn check_and_insert_token(
     let (erc_name, erc_symbol, erc_decimals, erc_granularity) = match erc_type {
         TokenType::ERC20 => {
             let contract = create_erc20_contract(token_address_value, provider.clone())?;
-            let erc_name: String = contract.name().call().await?;
-            let erc_symbol: String = contract.symbol().call().await?;
-            let erc_decimals: i16 = contract.decimals().call().await?.try_into().map_err(|_| "Failed to convert decimals to i16")?;
-            (erc_name, erc_symbol, Some(erc_decimals), None)
+            let erc_name = contract.name().call().await.ok();
+            let erc_symbol = contract.symbol().call().await.ok();
+            let erc_decimals = contract.decimals().call().await.ok().and_then(|d| d.try_into().ok());
+            (erc_name, erc_symbol, erc_decimals, None)
         }
         TokenType::ERC721 => {
             let contract = create_erc721_contract(token_address_value, provider.clone())?;
-            let erc_name: String = contract.name().call().await.unwrap_or_default(); // Handle optional metadata gracefully
-            let erc_symbol: String = contract.symbol().call().await.unwrap_or_default();
+            let erc_name = contract.name().call().await.ok();
+            let erc_symbol = contract.symbol().call().await.ok();
             (erc_name, erc_symbol, None, None) // No decimals for ERC721
         }
         TokenType::ERC777 => {
             let contract = create_erc777_contract(token_address_value, provider.clone())?;
-            let erc_name: String = contract.name().call().await?;
-            let erc_symbol: String = contract.symbol().call().await?;
-            let erc_granularity: i64 = contract.granularity().call().await?.try_into().map_err(|_| "Failed to convert granularity to i64")?;
-            (erc_name, erc_symbol, None, Some(erc_granularity)) // ERC777 has granularity
+            let erc_name = contract.name().call().await.ok();
+            let erc_symbol = contract.symbol().call().await.ok();
+            let erc_granularity = contract.granularity().call().await.ok().and_then(|g| g.try_into().ok());
+            (erc_name, erc_symbol, None, erc_granularity) // ERC777 has granularity
         }
         TokenType::ERC1155 => {
-            // ERC1155 does not have `name` and `symbol` methods in the standard, return default values
-            ("ERC1155 Token".to_string(), "ERC1155".to_string(), None, None)
+            let contract = create_erc1155_contract(token_address_value, provider.clone())?;
+            let erc_name = contract.name().call().await.ok();
+            let erc_symbol = contract.symbol().call().await.ok();
+            (erc_name, erc_symbol, None, None) // No decimals for ERC1155
         }
     };
 
@@ -66,8 +68,8 @@ pub async fn check_and_insert_token(
             TokenType::ERC777 => "ERC777",
             TokenType::ERC1155 => "ERC1155",
         },
-        name: &erc_name,
-        symbol: &erc_symbol,
+        name: erc_name.clone(),
+        symbol: erc_symbol.clone(),
         decimals: erc_decimals,
         granularity: erc_granularity,
     };
@@ -105,35 +107,32 @@ pub async fn fetch_and_store_token_uri(
 
     if let Some(existing_token) = existing_token_id {
         if existing_token.token_uri.is_some() {
-            println!("Token metadata already exists for contract {:?}, tokenId {}", contract_address_value, token_id_value);
-            return Ok(());
+            return Ok(()); // If metadata already exists, exit early
         }
     }
 
+    // Fetch the URI based on the token type
     let uri: Option<String> = match erc_type {
         TokenType::ERC721 => {
             let contract = create_erc721_contract(contract_address_value, provider.clone())?;
-            Some(contract.method::<_, String>("tokenURI", token_id_value)?.call().await?)
+            contract.method::<_, String>("tokenURI", token_id_value)?.call().await.ok()
         }
         TokenType::ERC1155 => {
             let contract = create_erc1155_contract(contract_address_value, provider.clone())?;
-            Some(contract.method::<_, String>("uri", token_id_value)?.call().await?)
+            contract.method::<_, String>("uri", token_id_value)?.call().await.ok()
         }
         _ => None,
     };
 
+    // Construct the new token ID entry
+    let new_token_id = NewTokenID {
+        contract_address: contract_address_value,
+        token_id: token_id_value,
+        token_uri: uri,
+    };
 
-    if let Some(uri) = uri {
-            let new_token_id = NewTokenID {
-                contract_address: contract_address_value,
-                token_id: token_id_value,
-                token_uri: Some(uri),
-            };
-
-            diesel::insert_into(token_ids).values(&new_token_id).execute(conn)?;
-        }
-
-        println!("Persisted tokenURI for contract {:x?}, tokenId {}", contract_address_value, token_id_value);
+    // Insert the new token ID into the database
+    insert_into(token_ids).values(&new_token_id).execute(conn)?;
 
     Ok(())
 }

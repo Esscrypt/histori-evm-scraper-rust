@@ -7,8 +7,8 @@ pub struct Token {
     pub token_address: Vec<u8>,            // 20-byte token address
     pub block_number: i32,                 // Integer for block number
     pub token_type: String,             // Enum for the token type (ERC20, ERC721, etc.)
-    pub name: String,                      // Name is required
-    pub symbol: String,                    // Symbol is required
+    pub name: Option<String>,                      // Name is required
+    pub symbol: Option<String>,                    // Symbol is required
     
     // ERC20-specific metadata
     pub decimals: Option<i16>,             // Decimals (optional for ERC20)
@@ -27,8 +27,8 @@ pub struct NewToken<'a> {
     pub block_number: i32,                 // Block number
     pub token_type: &'a str,             // Enum for the token type (ERC20, ERC721, etc.)
     
-    pub name: &'a str,                     // Name is required
-    pub symbol: &'a str,                   // Symbol is required
+    pub name: Option<String>,                     // Name is required
+    pub symbol: Option<String>,                   // Symbol is required
     pub decimals: Option<i16>,             // Decimals (optional for ERC20)
     pub granularity: Option<i64>,             // Decimals (optional for ERC20)
     

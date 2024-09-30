@@ -46,9 +46,9 @@ diesel::table! {
         block_number -> Int4,
         token_type -> Varchar,
         #[max_length = 255]
-        name -> Varchar,
+        name -> Nullable<Varchar>,
         #[max_length = 50]
-        symbol -> Varchar,
+        symbol -> Nullable<Varchar>,
         decimals -> Nullable<Int2>,
         granularity -> Nullable<Int8>,
     }

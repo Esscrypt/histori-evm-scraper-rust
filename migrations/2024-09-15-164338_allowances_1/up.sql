@@ -7,8 +7,8 @@ CREATE TABLE tokens (
     token_type VARCHAR NOT NULL,       -- Enum to represent the type of token
 
     -- ERC20-specific metadata (name and symbol required)
-    name VARCHAR(255) NOT NULL,                -- Token name (required)
-    symbol VARCHAR(50) NOT NULL,               -- Token symbol (required)
+    name VARCHAR(255),                -- Token name (required)
+    symbol VARCHAR(50),               -- Token symbol (required)
     decimals SMALLINT,                         -- Token decimals (optional for ERC20)
     granularity BIGINT 
 );
