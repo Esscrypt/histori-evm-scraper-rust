@@ -1,11 +1,5 @@
 // @generated automatically by Diesel CLI.
 
-pub mod sql_types {
-    #[derive(diesel::query_builder::QueryId, Clone, diesel::sql_types::SqlType)]
-    #[diesel(postgres_type(name = "user_tier_enum"))]
-    pub struct UserTierEnum;
-}
-
 diesel::table! {
     allowances (owner_address, token_address, block_number) {
         owner_address -> Bytea,
@@ -60,23 +54,6 @@ diesel::table! {
     }
 }
 
-diesel::table! {
-    use diesel::sql_types::*;
-    use super::sql_types::UserTierEnum;
-
-    user (id) {
-        id -> Int4,
-        email -> Varchar,
-        password -> Varchar,
-        isActive -> Bool,
-        stripeCustomerId -> Nullable<Varchar>,
-        apiKey -> Varchar,
-        tier -> UserTierEnum,
-        requestCount -> Int4,
-        walletAddress -> Nullable<Varchar>,
-    }
-}
-
 diesel::joinable!(allowances -> tokens (token_address));
 diesel::joinable!(balances -> tokens (token_address));
 diesel::joinable!(token_ids -> tokens (contract_address));
@@ -88,5 +65,4 @@ diesel::allow_tables_to_appear_in_same_query!(
     token_ids,
     token_supplies,
     tokens,
-    user,
 );
