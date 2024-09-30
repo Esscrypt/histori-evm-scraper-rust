@@ -43,10 +43,10 @@ async fn handle_erc1155_transfer_single(log: &Log, conn: &mut PgPooledConnection
 
     if cli.process_balances {
         // Update the balance for the sender (subtract)
-        update_historical_balance(conn, from.as_bytes(), log.address.as_bytes(), -(value as i64), Some(token_id as i16), "ERC1155", log.block_number.unwrap().as_u32() as i32).unwrap();
+        update_historical_balance(conn, from.as_bytes(), log.address.as_bytes(), format!("-{}", value), Some(token_id as i16), "ERC1155", log.block_number.unwrap().as_u32() as i32).unwrap();
 
         // Update the balance for the recipient (add)
-        update_historical_balance(conn, to.as_bytes(), log.address.as_bytes(), value as i64, Some(token_id as i16), "ERC1155", log.block_number.unwrap().as_u32() as i32).unwrap();
+        update_historical_balance(conn, to.as_bytes(), log.address.as_bytes(), format!("{}", value), Some(token_id as i16), "ERC1155", log.block_number.unwrap().as_u32() as i32).unwrap();
     }
 
     Ok(())
@@ -71,10 +71,10 @@ async fn handle_erc1155_transfer_batch(log: &Log, conn: &mut PgPooledConnection,
             }
             if cli.process_balances {
                 // Update the balance for the sender (subtract)
-                update_historical_balance(conn, from.as_bytes(), log.address.as_bytes(), -(*value as i64), Some(*token_id as i16), "ERC1155", log.block_number.unwrap().as_u32() as i32).unwrap();
+                update_historical_balance(conn, from.as_bytes(), log.address.as_bytes(), format!("-{}", value), Some(*token_id as i16), "ERC1155", log.block_number.unwrap().as_u32() as i32).unwrap();
 
                 // Update the balance for the recipient (add)
-                update_historical_balance(conn, to.as_bytes(), log.address.as_bytes(), *value as i64, Some(*token_id as i16), "ERC1155", log.block_number.unwrap().as_u32() as i32).unwrap();
+                update_historical_balance(conn, to.as_bytes(), log.address.as_bytes(), format!("{}", value), Some(*token_id as i16), "ERC1155", log.block_number.unwrap().as_u32() as i32).unwrap();
             }
         }
 
@@ -92,25 +92,25 @@ async fn handle_erc1155_approval_for_all(log: &Log, conn: &mut PgPooledConnectio
     let value = if approved { 1 } else { 0 };  // Set allowance to 1 for approval, 0 for revocation
 
     // Update operator allowance for all tokens owned by the user (without token_id)
-    update_historical_allowance(conn, owner.as_bytes(), operator.as_bytes(), log.address.as_bytes(), value, None, "ERC1155", log.block_number.unwrap().as_u32() as i32).unwrap();
+    update_historical_allowance(conn, owner.as_bytes(), operator.as_bytes(), log.address.as_bytes(), value.to_string(), None, "ERC1155", log.block_number.unwrap().as_u32() as i32).unwrap();
 
     Ok(())
 }
 
-fn parse_transfer_single(data: Vec<u8>) -> (i16, u64) {
+fn parse_transfer_single(data: Vec<u8>) -> (i16, U256) {
     let token_id = U256::from_big_endian(&data[0..32]).as_u32() as i16;
-    let value = U256::from_big_endian(&data[32..64]).as_u64();
+    let value = U256::from_big_endian(&data[32..64]);
     (token_id, value)
 }
 
-fn parse_transfer_batch(data: Vec<u8>) -> (Vec<i16>, Vec<u64>) {
+fn parse_transfer_batch(data: Vec<u8>) -> (Vec<i16>, Vec<U256>) {
     let token_count = data.len() / 64;  // Each token ID and value takes 32 bytes each
     let mut token_ids = Vec::new();
     let mut values = Vec::new();
 
     for i in 0..token_count {
         let token_id = U256::from_big_endian(&data[i * 32..(i + 1) * 32]).as_u32() as i16;
-        let value = U256::from_big_endian(&data[(i + token_count) * 32..(i + token_count + 1) * 32]).as_u64();
+        let value = U256::from_big_endian(&data[(i + token_count) * 32..(i + token_count + 1) * 32]);
         token_ids.push(token_id);
         values.push(value);
     }

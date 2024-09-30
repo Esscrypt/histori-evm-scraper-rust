@@ -37,7 +37,7 @@ async fn handle_erc777_sent(log: &Log, conn: &mut  PgPooledConnection, provider:
     let _operator = Address::from(log.topics[1]);
     let from = Address::from(log.topics[2]);
     let to = Address::from(log.topics[3]);
-    let value = U256::from_big_endian(&log.data[0..32]).as_u64() as i64;
+    let value = U256::from_big_endian(&log.data[0..32]);
     let block_number = log.block_number.unwrap().as_u32() as i32;
 
     // Pass the token type (ERC20 in this case) to check_and_insert_token
@@ -45,10 +45,10 @@ async fn handle_erc777_sent(log: &Log, conn: &mut  PgPooledConnection, provider:
 
     if cli.process_balances {
         // Update the balance for the sender (subtract)
-        update_historical_balance(conn, from.as_bytes(), log.address.as_bytes(), -value, None, "ERC777", log.block_number.unwrap().as_u64() as i32).unwrap();
+        update_historical_balance(conn, from.as_bytes(), log.address.as_bytes(), format!("-{}", value), None, "ERC777", log.block_number.unwrap().as_u64() as i32).unwrap();
 
         // Update the balance for the recipient (add)
-        update_historical_balance(conn, to.as_bytes(), log.address.as_bytes(), value, None, "ERC777", log.block_number.unwrap().as_u64() as i32).unwrap();
+        update_historical_balance(conn, to.as_bytes(), log.address.as_bytes(), format!("{}", value), None, "ERC777", log.block_number.unwrap().as_u64() as i32).unwrap();
 
     }
 
@@ -59,15 +59,15 @@ async fn handle_erc777_minted(log: &Log, conn: &mut PgPooledConnection, cli: &Ar
     // Parse Minted event
     let _operator = Address::from(log.topics[1]);
     let to = Address::from(log.topics[2]);
-    let value = U256::from_big_endian(&log.data[0..32]).as_u64() as i64;
+    let value = U256::from_big_endian(&log.data[0..32]);
 
     if cli.process_balances {
         // Update the balance for the recipient (add)
-        update_historical_balance(conn, to.as_bytes(), log.address.as_bytes(), value, None, "ERC777", log.block_number.unwrap().as_u32() as i32).unwrap();
+        update_historical_balance(conn, to.as_bytes(), log.address.as_bytes(), format!("{}", value), None, "ERC777", log.block_number.unwrap().as_u32() as i32).unwrap();
     }
     if cli.process_total_supplies {
         // Increase the total supply
-        update_total_supply(conn, log.address.as_bytes(), value, log.block_number.unwrap().as_u32() as i32)?;
+        update_total_supply(conn, log.address.as_bytes(), format!("{}", value), log.block_number.unwrap().as_u32() as i32)?;
     }
 
     Ok(())
@@ -77,15 +77,15 @@ async fn handle_erc777_burned(log: &Log, conn: &mut PgPooledConnection, cli: &Cl
     // Parse Burned event
     let _operator = Address::from(log.topics[1]);
     let from = Address::from(log.topics[2]);
-    let value = U256::from_big_endian(&log.data[0..32]).as_u64() as i64;
+    let value = U256::from_big_endian(&log.data[0..32]);
 
     if cli.process_balances {
         // Update the balance for the sender (subtract)
-        update_historical_balance(conn, from.as_bytes(), log.address.as_bytes(), -value, None, "ERC777", log.block_number.unwrap().as_u32() as i32).unwrap();
+        update_historical_balance(conn, from.as_bytes(), log.address.as_bytes(), format!("-{}", value), None, "ERC777", log.block_number.unwrap().as_u32() as i32).unwrap();
     }
     if cli.process_total_supplies {
         // Decrease the total supply
-        update_total_supply(conn, log.address.as_bytes(), -value, log.block_number.unwrap().as_u32() as i32).unwrap();
+        update_total_supply(conn, log.address.as_bytes(), format!("-{}", value), log.block_number.unwrap().as_u32() as i32).unwrap();
     }
 
     Ok(())
@@ -99,7 +99,7 @@ async fn handle_erc777_authorized_operator(log: &Log, conn: &mut PgPooledConnect
     let operator = Address::from(log.topics[2]);
 
     // Update allowance for the operator (1 means authorized)
-    update_historical_allowance(conn, holder.as_bytes(), operator.as_bytes(), log.address.as_bytes(), 1, None, "ERC777", log.block_number.unwrap().as_u32() as i32).unwrap();
+    update_historical_allowance(conn, holder.as_bytes(), operator.as_bytes(), log.address.as_bytes(), "1".to_string(), None, "ERC777", log.block_number.unwrap().as_u32() as i32).unwrap();
 
     Ok(())
 }
@@ -111,7 +111,7 @@ async fn handle_erc777_revoked_operator(log: &Log, conn: &mut PgPooledConnection
     let operator = Address::from(log.topics[2]);
 
     // Update allowance for the operator (0 means revoked)
-    update_historical_allowance(conn, holder.as_bytes(), operator.as_bytes(), log.address.as_bytes(), 0, None, "ERC777", log.block_number.unwrap().as_u32() as i32).unwrap();
+    update_historical_allowance(conn, holder.as_bytes(), operator.as_bytes(), log.address.as_bytes(), "0".to_string(), None, "ERC777", log.block_number.unwrap().as_u32() as i32).unwrap();
 
     Ok(())
 }

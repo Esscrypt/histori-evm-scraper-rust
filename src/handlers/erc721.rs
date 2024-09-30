@@ -46,10 +46,10 @@ async fn handle_erc721_log(log: &Log, conn: &mut PgPooledConnection, provider: A
         // Parse Transfer event
 
         // Update the balance for the sender (subtract ownership) with historical tracking
-        update_historical_balance(conn, from.as_bytes(), log.address.as_bytes(), -1, Some(token_id), "ERC721", log.block_number.unwrap().as_u64() as i32)?;
+        update_historical_balance(conn, from.as_bytes(), log.address.as_bytes(), "-1".to_string(), Some(token_id), "ERC721", log.block_number.unwrap().as_u64() as i32)?;
 
         // Update the balance for the recipient (add ownership) with historical tracking
-        update_historical_balance(conn, to.as_bytes(), log.address.as_bytes(), 1, Some(token_id), "ERC721", log.block_number.unwrap().as_u64() as i32)?;
+        update_historical_balance(conn, to.as_bytes(), log.address.as_bytes(), "1".to_string(), Some(token_id), "ERC721", log.block_number.unwrap().as_u64() as i32)?;
     }
 
     Ok(())
@@ -63,7 +63,7 @@ async fn handle_erc721_allowance(log: &Log, conn: &mut PgPooledConnection, cli: 
         let token_id = U256::from(log.topics[3].0).as_u32() as i16;
 
         // Insert approval for a specific token_id with historical tracking
-        update_historical_allowance(conn, owner.as_bytes(), approved.as_bytes(), log.address.as_bytes(), 1, Some(token_id), "ERC721", log.block_number.unwrap().as_u64() as i32).unwrap();
+        update_historical_allowance(conn, owner.as_bytes(), approved.as_bytes(), log.address.as_bytes(), "1".to_string(), Some(token_id), "ERC721", log.block_number.unwrap().as_u64() as i32).unwrap();
     }
 
     Ok(())
@@ -79,7 +79,7 @@ async fn handle_erc721_approval_for_all(log: &Log, conn: &mut PgPooledConnection
         let value = if approved { 1 } else { 0 };  // Set allowance to 1 for approval, 0 for revocation
 
         // Update operator allowance for all tokens owned by the user (without token_id)
-        update_historical_allowance(conn, owner.as_bytes(), operator.as_bytes(), log.address.as_bytes(), value, None, "ERC721", log.block_number.unwrap().as_u64() as i32).unwrap();
+        update_historical_allowance(conn, owner.as_bytes(), operator.as_bytes(), log.address.as_bytes(), value.to_string(), None, "ERC721", log.block_number.unwrap().as_u64() as i32).unwrap();
     }
 
     Ok(())

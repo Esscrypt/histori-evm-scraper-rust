@@ -5,10 +5,10 @@ diesel::table! {
         owner_address -> Bytea,
         spender_address -> Bytea,
         token_address -> Bytea,
-        allowance -> Nullable<Int8>,
+        allowance -> Nullable<Text>,
         block_number -> Int4,
         token_id -> Nullable<Int2>,
-        token_type -> Varchar,
+        token_type -> Text,
     }
 }
 
@@ -16,9 +16,9 @@ diesel::table! {
     balances (wallet_address, token_address, block_number) {
         wallet_address -> Bytea,
         token_address -> Bytea,
-        balance -> Int8,
+        balance -> Text,
         token_id -> Nullable<Int2>,
-        token_type -> Varchar,
+        token_type -> Text,
         block_number -> Int4,
     }
 }
@@ -27,15 +27,14 @@ diesel::table! {
     token_ids (contract_address, token_id) {
         contract_address -> Bytea,
         token_id -> Int2,
-        #[max_length = 255]
-        token_uri -> Nullable<Varchar>,
+        token_uri -> Nullable<Text>,
     }
 }
 
 diesel::table! {
     token_supplies (token_address, block_number) {
         token_address -> Bytea,
-        total_supply -> Int8,
+        total_supply -> Text,
         block_number -> Int4,
     }
 }
@@ -45,13 +44,10 @@ diesel::table! {
         token_address -> Bytea,
         block_number -> Int4,
         token_type -> Varchar,
-        #[max_length = 255]
-        name -> Nullable<Varchar>,
-        #[max_length = 50]
-        symbol -> Nullable<Varchar>,
+        name -> Nullable<Text>,
+        symbol -> Nullable<Text>,
         decimals -> Nullable<Int2>,
-        #[max_length = 255]
-        granularity -> Nullable<Varchar>,
+        granularity -> Nullable<Text>,
     }
 }
 
