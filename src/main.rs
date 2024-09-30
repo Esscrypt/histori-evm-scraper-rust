@@ -163,12 +163,19 @@ async fn fetch_logs(provider: &Provider<Http>, from_block: u64, to_block: u64, c
 
     // Convert HashSet back to Vec<H256> for the FilterBuilder
     let topics_vec: Vec<H256> = topics.into_iter().collect();
-
+    info!("Fetching logs with topics: {:?}", topics_vec);
     // Build the log filter
     let filter = Filter::new()
         .from_block(BlockNumber::Number(from_block.into()))
         .to_block(BlockNumber::Number(to_block.into()))
         .events(topics_vec);
 
-    provider.get_logs(&filter).await.unwrap()
+    let logs = match provider.get_logs(&filter).await {
+        Ok(logs) => logs,
+        Err(e) => {
+            error!("Error fetching logs: {:?}", e);
+            return Vec::new();
+        },
+    };
+    logs
 }
