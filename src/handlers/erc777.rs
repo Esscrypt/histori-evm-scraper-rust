@@ -10,7 +10,7 @@ use crate::token_service::check_and_insert_token;
 use crate::{Cli, PgPooledConnection, TokenType, ERC777_AUTHORIZED_OPERATOR_SIGNATURE, ERC777_BURNED_SIGNATURE, ERC777_MINTED_SIGNATURE, ERC777_REVOKED_OPERATOR_SIGNATURE, ERC777_SENT_SIGNATURE};
 
 
-pub async fn handle_erc777_event(log: &Log, conn: &mut PgPooledConnection, provider: Arc<Provider<Http>>, cli: &Arc<Cli>) -> std::result::Result<(), Box<(dyn std::error::Error + 'static)>> {
+pub async fn handle_erc777_event(log: &Log, conn: &mut PgPooledConnection, provider: Arc<Provider<Http>>, cli: &Arc<Cli>) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let event_signature: H256 = log.topics[0];
 
     // ERC777 Event Signatures
@@ -32,7 +32,7 @@ pub async fn handle_erc777_event(log: &Log, conn: &mut PgPooledConnection, provi
     Ok(())
 }
 
-async fn handle_erc777_sent(log: &Log, conn: &mut  PgPooledConnection, provider: Arc<Provider<Http>>, cli: &Arc<Cli>) -> std::result::Result<(), Box<(dyn std::error::Error + 'static)>> {
+async fn handle_erc777_sent(log: &Log, conn: &mut  PgPooledConnection, provider: Arc<Provider<Http>>, cli: &Arc<Cli>) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // Parse Sent event
     let _operator = Address::from(log.topics[1]);
     let from = Address::from(log.topics[2]);
@@ -55,7 +55,7 @@ async fn handle_erc777_sent(log: &Log, conn: &mut  PgPooledConnection, provider:
     Ok(())
 }
 
-async fn handle_erc777_minted(log: &Log, conn: &mut PgPooledConnection, cli: &Arc<Cli>) -> std::result::Result<(), Box<(dyn std::error::Error + 'static)>> {
+async fn handle_erc777_minted(log: &Log, conn: &mut PgPooledConnection, cli: &Arc<Cli>) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // Parse Minted event
     let _operator = Address::from(log.topics[1]);
     let to = Address::from(log.topics[2]);
@@ -73,7 +73,7 @@ async fn handle_erc777_minted(log: &Log, conn: &mut PgPooledConnection, cli: &Ar
     Ok(())
 }
 
-async fn handle_erc777_burned(log: &Log, conn: &mut PgPooledConnection, cli: &Cli) -> std::result::Result<(), Box<(dyn std::error::Error + 'static)>> {
+async fn handle_erc777_burned(log: &Log, conn: &mut PgPooledConnection, cli: &Cli) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // Parse Burned event
     let _operator = Address::from(log.topics[1]);
     let from = Address::from(log.topics[2]);
@@ -91,7 +91,7 @@ async fn handle_erc777_burned(log: &Log, conn: &mut PgPooledConnection, cli: &Cl
     Ok(())
 }
 
-async fn handle_erc777_authorized_operator(log: &Log, conn: &mut PgPooledConnection, cli: &Arc<Cli>) -> std::result::Result<(), Box<(dyn std::error::Error + 'static)>> {
+async fn handle_erc777_authorized_operator(log: &Log, conn: &mut PgPooledConnection, cli: &Arc<Cli>) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     if !cli.process_allowances { return Ok(()) } ;
 
     // Parse AuthorizedOperator event
@@ -104,7 +104,7 @@ async fn handle_erc777_authorized_operator(log: &Log, conn: &mut PgPooledConnect
     Ok(())
 }
 
-async fn handle_erc777_revoked_operator(log: &Log, conn: &mut PgPooledConnection, cli: &Cli) -> std::result::Result<(), Box<(dyn std::error::Error + 'static)>> {
+async fn handle_erc777_revoked_operator(log: &Log, conn: &mut PgPooledConnection, cli: &Cli) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     if !cli.process_allowances { return Ok(())} ;
     // Parse RevokedOperator event
     let holder = Address::from(log.topics[1]);

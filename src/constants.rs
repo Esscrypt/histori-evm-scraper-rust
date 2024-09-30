@@ -1,10 +1,10 @@
-
-use std::{fs, sync::Arc};
-
-use ethers::{abi::Abi, types::H256};
+use std::{sync::Arc};
+use ethers::types::{Address, H256};
+use ethers::prelude::*;
 use once_cell::sync::Lazy;
-use serde_json::from_str;
+use ethers::providers::{Http, Provider};
 
+// Event signatures as `Lazy` static variables
 pub static ERC_TRANSFER_SIGNATURE: Lazy<H256> = Lazy::new(|| {
     H256::from_slice(&hex_literal::hex!(
         "ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
@@ -65,14 +65,62 @@ pub static ERC_APPROVAL_FOR_ALL_SIGNATURE: Lazy<H256> = Lazy::new(|| {
     ))
 });
 
-// Function to load ABI from a file
-fn load_abi(path: &str) -> Abi {
-    let abi = fs::read_to_string(path).expect("ABI file not found");
-    from_str(&abi).expect("Failed to parse ABI")
+// Use `Abigen` to generate the contract bindings at compile time
+abigen!(
+    ERC20,
+    "src/abis/erc20_abi.json",
+    event_derives(serde::Deserialize, serde::Serialize)
+);
+
+abigen!(
+    ERC721,
+    "src/abis/erc721_abi.json",
+    event_derives(serde::Deserialize, serde::Serialize)
+);
+
+abigen!(
+    ERC777,
+    "src/abis/erc777_abi.json",
+    event_derives(serde::Deserialize, serde::Serialize)
+);
+
+abigen!(
+    ERC1155,
+    "src/abis/erc1155_abi.json",
+    event_derives(serde::Deserialize, serde::Serialize)
+);
+
+/// Function to create an ERC20 contract instance
+pub fn create_erc20_contract(
+    token_address_value: &[u8],
+    provider: Arc<Provider<Http>>,
+) -> Result<ERC20<Provider<Http>>, Box<dyn std::error::Error + Send + Sync>> {
+    let address = Address::from_slice(token_address_value);
+    Ok(ERC20::new(address, provider))
 }
 
-// Define ABIs as static variables, loaded once for the entire lifetime of the program
-pub static ERC20_ABI: Lazy<Arc<Abi>> = Lazy::new(|| Arc::new(load_abi("./abis/erc20_abi.json")));
-pub static ERC721_ABI: Lazy<Arc<Abi>> = Lazy::new(|| Arc::new(load_abi("./abis/erc721_abi.json")));
-pub static ERC777_ABI: Lazy<Arc<Abi>> = Lazy::new(|| Arc::new(load_abi("./abis/erc777_abi.json")));
-pub static ERC1155_ABI: Lazy<Arc<Abi>> = Lazy::new(|| Arc::new(load_abi("./abis/erc1155_abi.json")));
+pub fn create_erc721_contract(
+    token_address_value: &[u8],
+    provider: Arc<Provider<Http>>,
+) -> Result<ERC721<Provider<Http>>, Box<dyn std::error::Error + Send + Sync>> {
+    let address = Address::from_slice(token_address_value);
+    Ok(ERC721::new(address, provider))
+}
+
+/// Function to create an ERC777 contract instance
+pub fn create_erc777_contract(
+    token_address_value: &[u8],
+    provider: Arc<Provider<Http>>,
+) -> Result<ERC777<Provider<Http>>, Box<dyn std::error::Error + Send + Sync>> {
+    let address = Address::from_slice(token_address_value);
+    Ok(ERC777::new(address, provider))
+}
+
+/// Function to create an ERC1155 contract instance
+pub fn create_erc1155_contract(
+    token_address_value: &[u8],
+    provider: Arc<Provider<Http>>,
+) -> Result<ERC1155<Provider<Http>>, Box<dyn std::error::Error + Send + Sync>> {
+    let address = Address::from_slice(token_address_value);
+    Ok(ERC1155::new(address, provider))
+}

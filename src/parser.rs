@@ -13,7 +13,7 @@ pub async fn parse_log(
     conn: &mut PgPooledConnection, 
     provider: Arc<Provider<Http>>, 
     cli: &Arc<Cli>
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let token_address: H160 = log.address;
 
     // Determine the token type based on the address

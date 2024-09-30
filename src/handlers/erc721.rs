@@ -9,7 +9,7 @@ use crate::token_service::{check_and_insert_token, fetch_and_store_token_uri};
 use crate::{Cli, PgPooledConnection, TokenType, ERC_APPROVAL_FOR_ALL_SIGNATURE, ERC_APPROVAL_SIGNATURE, ERC_TRANSFER_SIGNATURE};
 
 
-pub async fn handle_erc721_event(log: &Log, conn: &mut PgPooledConnection, provider: Arc<Provider<Http>>, cli: &Arc<Cli>) -> std::result::Result<(), Box<(dyn std::error::Error + 'static)>> {
+pub async fn handle_erc721_event(log: &Log, conn: &mut PgPooledConnection, provider: Arc<Provider<Http>>, cli: &Arc<Cli>) -> Result<(), Box<dyn std::error::Error + Send + Sync>>  {
     let event_signature: H256 = log.topics[0];
 
     // ERC721 Event Signatures
@@ -28,7 +28,7 @@ pub async fn handle_erc721_event(log: &Log, conn: &mut PgPooledConnection, provi
 }
 
 
-async fn handle_erc721_log(log: &Log, conn: &mut PgPooledConnection, provider: Arc<Provider<Http>>, cli: &Arc<Cli>) -> std::result::Result<(), Box<(dyn std::error::Error + 'static)>> {
+async fn handle_erc721_log(log: &Log, conn: &mut PgPooledConnection, provider: Arc<Provider<Http>>, cli: &Arc<Cli>) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let block_number = log.block_number.unwrap().as_u32() as i32;
 
     let from = Address::from(log.topics[1]);
@@ -55,7 +55,7 @@ async fn handle_erc721_log(log: &Log, conn: &mut PgPooledConnection, provider: A
     Ok(())
 }
 
-async fn handle_erc721_allowance(log: &Log, conn: &mut PgPooledConnection, cli: &Cli) -> std::result::Result<(), Box<(dyn std::error::Error + 'static)>> {
+async fn handle_erc721_allowance(log: &Log, conn: &mut PgPooledConnection, cli: &Cli) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     if cli.process_allowances {
         // Parse Approval event
         let owner = Address::from(log.topics[1]);
@@ -69,7 +69,7 @@ async fn handle_erc721_allowance(log: &Log, conn: &mut PgPooledConnection, cli: 
     Ok(())
 }
 
-async fn handle_erc721_approval_for_all(log: &Log, conn: &mut PgPooledConnection, cli: &Arc<Cli>) -> std::result::Result<(), Box<(dyn std::error::Error + 'static)>> {
+async fn handle_erc721_approval_for_all(log: &Log, conn: &mut PgPooledConnection, cli: &Arc<Cli>) -> Result<(), Box<dyn std::error::Error + Send + Sync>>{
     if cli.process_allowances {
         // Parse ApprovalForAll event
         let owner = Address::from(log.topics[1]);

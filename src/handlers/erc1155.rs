@@ -8,7 +8,7 @@ use crate::models::allowance::update_historical_allowance;
 use crate::token_service::{check_and_insert_token, fetch_and_store_token_uri};
 use crate::{Cli, PgPooledConnection, TokenType, ERC1155_BATCH_TRANSFER_SIGNATURE, ERC1155_SINGLE_TRANSFER_SIGNATURE, ERC_APPROVAL_FOR_ALL_SIGNATURE};
 
-pub async fn handle_erc1155_event(log: &Log, conn: &mut PgPooledConnection, provider: Arc<Provider<Http>>, cli: &Cli) -> std::result::Result<(), Box<(dyn std::error::Error + 'static)>> {
+pub async fn handle_erc1155_event(log: &Log, conn: &mut PgPooledConnection, provider: Arc<Provider<Http>>, cli: &Cli) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let event_signature: H256 = log.topics[0];
 
     // ERC1155 Event Signatures
@@ -26,7 +26,7 @@ pub async fn handle_erc1155_event(log: &Log, conn: &mut PgPooledConnection, prov
     Ok(())
 }
 
-async fn handle_erc1155_transfer_single(log: &Log, conn: &mut PgPooledConnection, provider: Arc<Provider<Http>>, cli: &Cli) -> std::result::Result<(), Box<(dyn std::error::Error + 'static)>> {
+async fn handle_erc1155_transfer_single(log: &Log, conn: &mut PgPooledConnection, provider: Arc<Provider<Http>>, cli: &Cli) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // Parse TransferSingle event
     let _operator = Address::from(log.topics[1]);
     let from = Address::from(log.topics[2]);
@@ -52,7 +52,7 @@ async fn handle_erc1155_transfer_single(log: &Log, conn: &mut PgPooledConnection
     Ok(())
 }
 
-async fn handle_erc1155_transfer_batch(log: &Log, conn: &mut PgPooledConnection, provider: Arc<Provider<Http>>, cli: &Cli) -> std::result::Result<(), Box<(dyn std::error::Error + 'static)>> {
+async fn handle_erc1155_transfer_batch(log: &Log, conn: &mut PgPooledConnection, provider: Arc<Provider<Http>>, cli: &Cli) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // Parse TransferBatch event
     let _operator = Address::from(log.topics[1]);
     let from = Address::from(log.topics[2]);
@@ -82,7 +82,7 @@ async fn handle_erc1155_transfer_batch(log: &Log, conn: &mut PgPooledConnection,
     Ok(())
 }
 
-async fn handle_erc1155_approval_for_all(log: &Log, conn: &mut PgPooledConnection, cli: &Cli) -> std::result::Result<(), Box<(dyn std::error::Error + 'static)>> {
+async fn handle_erc1155_approval_for_all(log: &Log, conn: &mut PgPooledConnection, cli: &Cli) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     if !cli.process_allowances { return Ok(()) }
     // Parse ApprovalForAll event
     let owner = Address::from(log.topics[1]);

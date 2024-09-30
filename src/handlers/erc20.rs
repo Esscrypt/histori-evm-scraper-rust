@@ -11,7 +11,7 @@ use crate::models::allowance::update_historical_allowance;
 use crate::models::balance::update_historical_balance;
 use crate::models::token_supply::update_total_supply;
 
-pub async fn handle_erc20_event(log: &Log, conn: &mut PgPooledConnection, provider: Arc<Provider<Http>>, cli: &Arc<Cli>) -> std::result::Result<(), Box<(dyn std::error::Error + 'static)>>  {
+pub async fn handle_erc20_event(log: &Log, conn: &mut PgPooledConnection, provider: Arc<Provider<Http>>, cli: &Arc<Cli>) ->  Result<(), Box<dyn std::error::Error + Send + Sync>>  {
     let event_signature: H256 = log.topics[0];
 
     // ERC20 Event Signatures
@@ -29,7 +29,7 @@ pub async fn handle_erc20_event(log: &Log, conn: &mut PgPooledConnection, provid
     Ok(())
 }
 
-async fn handle_erc20_log(log: &Log, conn: &mut PgPooledConnection, provider: Arc<Provider<Http>>, cli: &Arc<Cli>) -> std::result::Result<(), Box<(dyn std::error::Error + 'static)>> {
+async fn handle_erc20_log(log: &Log, conn: &mut PgPooledConnection, provider: Arc<Provider<Http>>, cli: &Arc<Cli>) -> Result<(), Box<dyn std::error::Error + Send + Sync>>  {
     info!(
         "Handling ERC20 transfer log for token address: {:?}",
         log.address
@@ -85,7 +85,7 @@ async fn handle_erc20_log(log: &Log, conn: &mut PgPooledConnection, provider: Ar
     Ok(())
 }
 
-async fn handle_erc20_allowance(log: &Log, conn: &mut PgPooledConnection, cli: &Arc<Cli>) -> std::result::Result<(), Box<(dyn std::error::Error + 'static)>> {
+async fn handle_erc20_allowance(log: &Log, conn: &mut PgPooledConnection, cli: &Arc<Cli>) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     if cli.process_allowances {
         // Parse Approval event
         let owner = Address::from(log.topics[1]);
