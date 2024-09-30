@@ -1,12 +1,13 @@
 use diesel::prelude::*;
 use crate::schema::allowances::dsl::*;
 use crate::PgPooledConnection;
-use ethers::types::U256;
 
-#[derive(Queryable)]
+use ethers::types::U256;
+#[derive(Queryable, Selectable)]
 #[diesel(table_name = crate::schema::allowances)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Allowance {
+    pub id: i32,                    // Unique ID for the allowance record
     pub owner_address: Vec<u8>,     // 20-byte address
     pub spender_address: Vec<u8>,   // 20-byte address
     pub token_address: Vec<u8>,     // 20-byte address
@@ -41,15 +42,19 @@ pub fn update_historical_allowance(
     // Parse the provided value into U256
     let value_u256 = U256::from_dec_str(&value).unwrap_or_else(|_| U256::zero());
 
-    // Get the most recent allowance for the owner, spender, and token
-    let latest_allowance = allowances
+    let mut query = allowances
         .filter(owner_address.eq(owner))
         .filter(spender_address.eq(spender))
         .filter(token_address.eq(token))
-        .filter(token_id.eq(token_id_value))
         .order_by(block_number.desc())
-        .first::<Allowance>(conn)
-        .optional()?; // Get the latest allowance or return None if no record exists
+        .into_boxed(); // Use `.into_boxed()` to allow conditional filters
+
+    if let Some(other_id) = token_id_value {
+        query = query.filter(token_id.eq(other_id)); // Add the token_id filter if it's Some
+    }
+
+    // Get the latest allowance
+    let latest_allowance: Option<Allowance> = query.select(Allowance::as_select()).first::<Allowance>(conn).optional()?;
 
     // Determine the new allowance value
     let new_allowance_value = if let Some(allowance_record) = latest_allowance {

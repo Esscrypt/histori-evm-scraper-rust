@@ -3,6 +3,7 @@ use diesel::prelude::*;
 #[derive(Debug, Queryable, Selectable)]
 #[diesel(table_name = crate::schema::token_ids)]
 pub struct TokenID {
+    pub id: i32,
     pub contract_address: Vec<u8>,
     pub token_id: i16,
     pub token_uri: Option<String>,

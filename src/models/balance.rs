@@ -7,6 +7,7 @@ use ethers::types::U256;
 #[diesel(table_name = crate::schema::balances)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Balance {
+    pub id: i32,                // Unique ID for the balance record
     pub wallet_address: Vec<u8>, // Wallet address (20 bytes)
     pub token_address: Vec<u8>,  // Token address (20 bytes)
     pub balance: String,            // Token balance (amount for ERC20/1155, 1 for ERC721)
@@ -41,8 +42,8 @@ pub fn update_historical_balance(
         .order_by(block_number.desc())
         .into_boxed(); // Use `.into_boxed()` to allow conditional filters
 
-    if let Some(id) = token_id_value {
-        query = query.filter(token_id.eq(id)); // Add the token_id filter if it's Some
+    if let Some(other_id) = token_id_value {
+        query = query.filter(token_id.eq(other_id)); // Add the token_id filter if it's Some
     }
 
     // Get the latest balance

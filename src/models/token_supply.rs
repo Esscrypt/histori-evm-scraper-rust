@@ -7,6 +7,7 @@ use ethers::types::U256;
 #[diesel(table_name = crate::schema::token_supply)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct TokenSupply {
+    pub id: i32,                    // Unique ID for the total supply record
     pub token_address: Vec<u8>,   // Token address (20 bytes)
     pub total_supply: String,        // Total supply of the token
     pub block_number: i32,        // Block number when the supply was recorded
